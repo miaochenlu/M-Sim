@@ -2,13 +2,9 @@ import os
 env = Environment()
 env['project_root'] = os.getcwd()
 env['project_name'] = 'simulator'
-env['install_root'] = './_external/'
-env['install_prefix'] = '/usr/local'
-env['depend_prefix'] = ["./_external/usr/local", "./_external/usr"]
 
-env.Append(CPPPATH=[env['depend_prefix'][0], '/usr/local/systemc-2.3.3/include', '/usr/include', './tb/', '.'])
-env.Append(LIBPATH=[env['depend_prefix'][0]+'/lib64', './usr/lib/', '/usr/local/systemc-2.3.3/lib-linux64/'])
-env.Alias('install', './_external/')
+env.Append(CPPPATH=['/usr/local/systemc-2.3.3/include', '/usr/include', './tb/', '.'])
+env.Append(LIBPATH=['./usr/lib/', '/usr/local/systemc-2.3.3/lib-linux64/'])
 
 env.SConscript(
     dirs = '.',
