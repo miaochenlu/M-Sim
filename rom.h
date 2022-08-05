@@ -3,9 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include <systemc>
-
-using namespace sc_core;
+#include <systemc.h>
 
 class ROM: public sc_module {
 public:

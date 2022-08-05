@@ -1,1 +1,1 @@
-LD_LIBRARY_PATH=/usr/local/systemc-2.3.3/lib-linux64/ ./build/simulator
+LD_LIBRARY_PATH=/usr/local/systemc-2.3.3/lib-linux64/ ./build/reg_test

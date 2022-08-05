@@ -1,6 +1,6 @@
-#include "rom.h"
 #include <fstream>
 #include <sstream>
+#include "rom.h"
 
 using namespace std;
 
@@ -22,27 +22,23 @@ ROM::ROM(sc_module_name name, const string& file_name):
         ss << insn;
         ss >> std::hex >> insn_bits;
         mem.push_back(insn_bits);
-        printf("insn: %#010x\n", mem[insn_cnt]);
+        // printf("insn: %#010x\n", mem[insn_cnt]);
         insn_cnt++;
     }
 
-    SC_CTHREAD(read, clk.pos());
-    sensitive << clk.pos() << rd_addr;
-    dont_initialize();
+    SC_METHOD(read);
+    sensitive << rd_addr;
 }
 
 void ROM::read() {
-    while(true) {
-        std::cout << "method triggered @ " << sc_time_stamp() << std::endl;
-        uint32_t addr = rd_addr.read();
+    uint32_t addr = rd_addr.read();
 
-        if(addr >= mem.size()) {
-            std::cout << "ERROR: addr out of range" << std::endl;
-        } else {
-            rd_data.write(mem[addr]);
-        }
-        wait();
+    if(addr >= mem.size()) {
+        std::cout << "ERROR: addr out of range" << std::endl;
+    } else {
+        rd_data.write(mem[addr]);
     }
+
 }
 
 ROM::~ROM() {
