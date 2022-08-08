@@ -1,9 +1,9 @@
-#include "reg_tb.h"
+#include "reg_file_tb.h"
 #include <iostream>
 
 using namespace std;
 
-void REG_TB::source() {
+void REG_FILE_TB::source() {
     // Reset
     rst.write(1);
     wr_en.write(0);
@@ -42,7 +42,7 @@ void REG_TB::source() {
     wait();
 }
 
-void REG_TB::sink() {
+void REG_FILE_TB::sink() {
     for(int i = 0; i < 10; i++) {
         wait();
         cout << "A value: " << rval_A.read() << "\t B value: " << rval_B.read() << endl;

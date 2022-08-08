@@ -1,9 +1,9 @@
-#include "reg.h"
-#include "tb/reg_tb.h"
+#include "reg_file.h"
+#include "tb/reg_file_tb.h"
 
 int sc_main(int, char* []) {
-    REG reg("reg");
-    REG_TB reg_tb("reg_tb");
+    REG_FILE reg("reg");
+    REG_FILE_TB reg_tb("reg_tb");
 
     sc_clock                clk("clk", 10, SC_SEC, 0.5, 10, SC_SEC, false);
     sc_signal<bool>         rst;

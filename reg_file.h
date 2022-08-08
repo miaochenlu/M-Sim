@@ -1,10 +1,10 @@
-#ifndef REG_H
-#define REG_H
+#ifndef REG_FILE_H
+#define REG_FILE_H
 
 #include <systemc.h>
 #include <cstdlib>
 
-class REG: public sc_module {
+class REG_FILE: public sc_module {
 public:
     sc_in_clk           clk;
     sc_in<bool>         rst;
@@ -20,7 +20,7 @@ public:
     void read();
     void write();
 
-    SC_CTOR(REG) {
+    SC_CTOR(REG_FILE) {
         for(int i = 0; i < 32; i++) {
             reg[i] = 0;
         }
@@ -28,7 +28,7 @@ public:
         SC_METHOD(read);
         sensitive << raddr_A << raddr_B;
 
-        SC_CTHREAD(write, clk.pos());
+        SC_CTHREAD(write, clk.neg());
         reset_signal_is(rst, true);
     }
 

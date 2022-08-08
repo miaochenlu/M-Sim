@@ -1,19 +1,12 @@
-#include "fetch.h"
+// #include "fetch.h"
 
-using namespace std;
+// using namespace std;
 
-FETCH::FETCH(sc_module_name name) {
-    SC_CTHREAD(fetch, clk.pos());
-}
+// FETCH::~FETCH() {
 
-FETCH::~FETCH() {
+// }
 
-}
-
-void FETCH::fetch() {
-    while(true) {
-        rd_addr = rd_addr + 1;
-        printf("insn: %#010x\n", rd_data.read());
-        wait();
-    }
-}
+// void FETCH::fetch() {
+//     rd_addr.write(rd_addr.read() + 1);
+//     printf("rd_addr: %#x insn: %#010x\n", rd_addr.read(), rd_data.read());
+// }

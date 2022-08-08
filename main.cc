@@ -1,23 +1,42 @@
 #include "rom.h"
-#include "fetch.h"
+#include "reg_pc.h"
+#include "tb/reg_pc_tb.h"
+#include "decode.h"
 
 int sc_main(int, char*[]) {
+    sc_core::sc_report_handler::set_actions( "/IEEE_Std_1666/deprecated",
+                                           sc_core::SC_DO_NOTHING );
+
     sc_clock clk("Clock", 1, SC_SEC, 0.5, 0.0, SC_NS);
 
-    sc_signal<unsigned> rom_rd_addr("ROM_RD_ADDR");
-    sc_signal<unsigned> rom_rd_data("ROM_RD_DATA");
+    sc_signal< bool >         rst;
+    sc_signal< bool >         enable;
+    sc_signal< sc_uint<32> >  pc_in;
+    sc_signal< sc_uint<32> >  pc_out;
 
+    sc_fifo< INSTRUCTION* >* fetch_fifo = new sc_fifo<INSTRUCTION*>(1);
+    sc_fifo< INSTRUCTION* >* decode_fifo = new sc_fifo<INSTRUCTION*>(1);
+    
+    REG_PC pc("pc");
+    pc.clk(clk);
+    pc.rst(rst);
+    pc.enable(enable);
+    pc.pc_in(pc_in);
+    pc.pc_out(pc_out);
+    
     ROM rom("rom", "rom.hex");
-
-    rom.rd_addr(rom_rd_addr);
-    rom.rd_data(rom_rd_data);
+    rom.rd_addr(pc_out);
+    rom.insn_out(*fetch_fifo);
     rom.clk(clk);
 
-    FETCH fetch("fetch");
-    fetch.rd_addr(rom_rd_addr);
-    fetch.rd_data(rom_rd_data);
-    fetch.clk(clk);
+    DECODE decode("decode");
+    decode.clk(clk);
+    decode.insn_in(*fetch_fifo);
+    decode.insn_out(*decode_fifo);
 
-    sc_start(7, SC_SEC);
+    sc_start(10, SC_SEC);
+
+    delete fetch_fifo;
+    delete decode_fifo;
     return 0;
 }

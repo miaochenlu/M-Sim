@@ -1,10 +1,10 @@
-#ifndef TB_REG_TB_H
-#define TB_REG_TB_H
+#ifndef TB_REG_FILE_TB_H
+#define TB_REG_FILE_TB_H
 
 #include <systemc.h>
 #include <cstdlib>
 
-class REG_TB: public sc_module {
+class REG_FILE_TB: public sc_module {
 public:
     sc_in_clk           clk;
     sc_out<bool>        rst;
@@ -20,7 +20,7 @@ public:
     void source();
     void sink();
 
-    SC_CTOR(REG_TB) {
+    SC_CTOR(REG_FILE_TB) {
         SC_CTHREAD(source, clk.pos());
         SC_CTHREAD(sink, clk.pos());
     }
