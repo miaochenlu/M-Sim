@@ -9,8 +9,9 @@ ROM::ROM(sc_module_name name, const string& file_name):
 
     init_memory(rom_file_name);
 
-    SC_METHOD(read);
-    sensitive << rd_addr;
+    // SC_METHOD(read);
+    // sensitive << rd_addr;
+    SC_CTHREAD(read, clk.pos());
 }
 
 void ROM::init_memory(const std::string& file_name) {
@@ -42,14 +43,22 @@ void ROM::init_memory(const std::string& file_name) {
 }
 
 void ROM::read() {
-    uint32_t addr = rd_addr.read();
-    INSTRUCTION* insn = NULL;
-    if(addr >= mem.size()) {
-        std::cout << "ERROR: addr out of range" << std::endl;
-    } else {
-        insn = new INSTRUCTION(addr, mem[addr]);
+    insn_out.write(NULL);
+    wait();
+
+    while(true) {
+        uint32_t addr = rd_addr.read();
+        INSTRUCTION* insn = NULL;
+        if((addr >> 2) >= mem.size()) {
+            std::cout << "ERROR: addr out of range" << std::endl;
+        } else {
+            insn = new INSTRUCTION(addr, mem[addr >> 2]);
+        }
+        insn_out.write(insn);
+        cout << "==ROM time @ " << sc_time_stamp();
+        printf("  pc: %#x rom read insn: %#x\n", addr, insn->get_insn_bits());
+        wait();
     }
-    insn_out.write(insn);
 
 }
 

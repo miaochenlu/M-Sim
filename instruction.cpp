@@ -19,3 +19,7 @@ void INSTRUCTION::decode() {
         }
     }
 }
+
+void INSTRUCTION::execute() {
+    printf("rs1 %d rs2 %d\n", rs1(), rs2());
+}

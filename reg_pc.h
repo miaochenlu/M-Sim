@@ -21,7 +21,7 @@ private:
 
 
 private:
-    sc_uint<32> reg_val;
+    uint32_t reg_val;
 };
 
 #endif

@@ -2,6 +2,7 @@
 #include "reg_pc.h"
 #include "tb/reg_pc_tb.h"
 #include "decode.h"
+#include "execute.h"
 
 int sc_main(int, char*[]) {
     sc_core::sc_report_handler::set_actions( "/IEEE_Std_1666/deprecated",
@@ -16,6 +17,7 @@ int sc_main(int, char*[]) {
 
     sc_fifo< INSTRUCTION* >* fetch_fifo = new sc_fifo<INSTRUCTION*>(1);
     sc_fifo< INSTRUCTION* >* decode_fifo = new sc_fifo<INSTRUCTION*>(1);
+    sc_fifo< INSTRUCTION* >* execute_fifo = new sc_fifo<INSTRUCTION*>(1);
     
     REG_PC pc("pc");
     pc.clk(clk);
@@ -34,9 +36,15 @@ int sc_main(int, char*[]) {
     decode.insn_in(*fetch_fifo);
     decode.insn_out(*decode_fifo);
 
-    sc_start(10, SC_SEC);
+    EXECUTE execute("execute");
+    execute.clk(clk);
+    execute.insn_in(*decode_fifo);
+    execute.insn_out(*execute_fifo);
+
+    sc_start(20, SC_SEC);
 
     delete fetch_fifo;
     delete decode_fifo;
+    delete execute_fifo;
     return 0;
 }
