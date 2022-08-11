@@ -1,8 +1,10 @@
-#ifndef INSN_DECODE_H
-#define INSN_DECODE_H
+#ifndef DECODER_H
+#define DECODER_H
 
+#include <stdint.h>
 #include <string>
 #include <vector>
+#include "base_inst.h"
 
 struct insn_decode_info {
 public:
@@ -13,14 +15,16 @@ public:
         name(name), match(match), mask(mask) {}
 };
 
-class INSN_DECODE {
+class decoder {
 public:
-    static INSN_DECODE& get_instance();
-    ~INSN_DECODE();
+    static decoder& get_instance();
+    ~decoder();
+
+    base_inst* build_inst(uint32_t pc, uint32_t insn_bits);
 private:
-    INSN_DECODE();
-    INSN_DECODE(const INSN_DECODE&) = delete;
-    INSN_DECODE& operator=(const INSN_DECODE&) = delete;
+    decoder();
+    decoder(const decoder&) = delete;
+    decoder& operator=(const decoder&) = delete;
 
 public:
     std::vector<insn_decode_info*> insn_info_list;
