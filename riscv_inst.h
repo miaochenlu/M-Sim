@@ -10,6 +10,18 @@ public:
 
     void execute();
 
+    std::string disassembly();
+};
+
+
+class addi: public imm_inst<int32_t> {
+
+public:
+    addi(uint32_t pc, uint32_t insn_bits, const std::string& name);
+
+    void execute();
+
+    std::string disassembly();
 };
 
 #endif

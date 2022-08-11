@@ -19,6 +19,9 @@ base_inst* decoder::build_inst(uint32_t pc, uint32_t insn_bits) {
     if((insn_bits & MASK_ADD) == MATCH_ADD) {
         printf("add instruction\n");
         return new add(pc, insn_bits, "add");
+    } else if((insn_bits & MASK_ADDI) == MATCH_ADDI) {
+        printf("addi instruction\n");
+        return new addi(pc, insn_bits, "addi");
     }
     return NULL;
 }

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <string>
 
 class base_inst {
 public:
@@ -33,8 +34,12 @@ public:
     uint32_t rs2() { return x(20, 5); }
     uint32_t rd()  { return x( 7, 5); }
     
+    int32_t i_imm() { return int32_t(insn_bits) >> 20; }
+    
     uint32_t get_insn_bits() const { return insn_bits; }
     const std::string get_insn_name() const { return insn_name; }
+
+    virtual std::string disassembly() { return std::string("test"); }
 };
 
 typedef std::shared_ptr<base_inst> base_inst_ptr;

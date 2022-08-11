@@ -11,6 +11,11 @@ public:
 
 template<typename imm_type>
 class imm_inst: public base_inst {
+public:
+    imm_inst(uint32_t pc, uint32_t insn_bits, const std::string& name, imm_type imm = 0)
+        : base_inst(pc, insn_bits, name), imm(imm) {
+    }
+    
 protected:
     imm_type imm;
 };
