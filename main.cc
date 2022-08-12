@@ -7,16 +7,15 @@
 using namespace std;
 
 int main() {
-    // decoder& m_decoder = decoder::get_instance();
-    // base_inst* inst = m_decoder.build_inst(0, 0xfff08093);
-    // inst->execute();
-    // cout << inst->disassembly() << endl;
-    // delete inst;
-    // inst = m_decoder.build_inst(0, 0x004100b3);
-    // inst->execute();
-    // cout << inst->disassembly() << endl;
-    // delete inst;
-
     rom M_rom("rom.hex");
-    printf("%#010x\n", M_rom.read(4));
+    decoder& m_decoder = decoder::get_instance();
+    uint32_t pc = 0;
+    for(int i = 0; i < 10; i++) {
+        base_inst* inst = m_decoder.build_inst(pc, M_rom.read(pc));
+        inst->execute();
+        cout << inst->disassembly() << endl;
+        delete inst;
+        pc += 4;
+    }
+
 }
