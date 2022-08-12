@@ -6,12 +6,14 @@
 #include <vector>
 #include <string>
 
+class processor;
+
 class base_inst {
 public:
     base_inst(uint32_t pc, uint32_t insn_bits, const std::string& name);
 
 public:
-    virtual void execute();
+    virtual void execute(processor& p);
 
 protected:
     /******reg related*******/

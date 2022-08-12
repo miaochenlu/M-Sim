@@ -1,5 +1,6 @@
 #include "riscv_inst.h"
 #include "reg_file.h"
+#include "processor.h"
 
 using namespace std;
 
@@ -10,14 +11,17 @@ add::add(uint32_t pc, uint32_t insn_bits, const std::string& name)
     dst_regs.resize(1); dst_regs[0] = rd();
 }
 
-void add::execute() {
+void add::execute(processor& p) {
     printf("src size: %ld reg list: %d %d \ndst size: %ld dst list: %d\n", 
         src_regs.size(), src_regs[0], src_regs[1], dst_regs.size(), dst_regs[0]);
-    reg_file& rf = reg_file::get_instance();
 
-    rf.write(dst_regs[0], rf.read(src_regs[0]) + rf.read(src_regs[1]));
+    arch_state* state = p.get_state();
+    state->gprs.write(
+        dst_regs[0], state->gprs.read(src_regs[0]) + state->gprs.read(src_regs[1])
+    );
 
-    printf("result dst val: %d\n", rf.read(dst_regs[0]));
+    state->npc = state->pc + 4;
+    printf("result dst val: %d\n", state->gprs.read(dst_regs[0]));
 }
 
 std::string add::disassembly() {
@@ -32,14 +36,15 @@ addi::addi(uint32_t pc, uint32_t insn_bits, const std::string& name)
     imm = i_imm();
 }
 
-void addi::execute() {
+void addi::execute(processor& p) {
     printf("src size: %ld reg list: %d\ndst size: %ld dst list: %d\n", 
         src_regs.size(), src_regs[0], dst_regs.size(), dst_regs[0]);
-    reg_file& rf = reg_file::get_instance();
-
-    rf.write(dst_regs[0], rf.read(src_regs[0]) + imm);
-
-    printf("result dst val: %d\n", rf.read(dst_regs[0]));
+    arch_state* state = p.get_state();
+    state->gprs.write(
+        dst_regs[0], state->gprs.read(src_regs[0]) + imm
+    );
+    state->npc = state->pc + 4;
+    printf("result dst val: %d\n", state->gprs.read(dst_regs[0]));
 }
 
 

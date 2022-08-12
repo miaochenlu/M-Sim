@@ -3,13 +3,10 @@
 
 #include <stdint.h>
 
-class reg_file {
+class gpr_regfile {
 public:
-    static reg_file& get_instance();
-    ~reg_file();
-
-private:
-    reg_file();
+    gpr_regfile(); 
+    ~gpr_regfile();
 
 public:
     uint32_t read(uint32_t index) const;
@@ -20,4 +17,15 @@ private:
     uint32_t regs[32];
 };
 
+class arch_state {
+public:
+    uint32_t pc;
+    uint32_t npc;
+    gpr_regfile gprs;
+
+public:
+    arch_state();
+    ~arch_state();
+    void reset();
+};
 #endif
