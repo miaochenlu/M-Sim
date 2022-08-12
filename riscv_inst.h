@@ -26,4 +26,15 @@ public:
     std::string disassembly();
 };
 
+
+class beq: public imm_inst<int32_t> {
+
+public:
+    beq(uint32_t pc, uint32_t insn_bits, const std::string& name);
+
+    void execute(processor& p);
+
+    std::string disassembly();
+};
+
 #endif

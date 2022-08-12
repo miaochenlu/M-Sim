@@ -8,11 +8,14 @@
 #define MASK_ADD 0xfe00707f
 #define MATCH_ADDI 0x13
 #define MASK_ADDI 0x707f
+#define MATCH_BEQ 0x63
+#define MASK_BEQ 0x707f
 #endif
 
 #ifdef DECLARE_INSN
 DECLARE_INSN(add, MATCH_ADD, MASK_ADD)
 DECLARE_INSN(addi, MATCH_ADDI, MASK_ADDI)
+DECLARE_INSN(beq, MATCH_BEQ, MASK_BEQ)
 #endif
 
 #endif

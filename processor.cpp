@@ -19,6 +19,7 @@ void processor::run() {
     for(int i = 0; i < 10; i++) {
         base_inst* inst = m_decoder.build_inst(m_arch_state.pc, m_rom.read(m_arch_state.pc));
         inst->execute(*this);
+        printf("%#10x: ", m_arch_state.pc);
         cout << inst->disassembly() << endl;
         delete inst;
         m_arch_state.pc = m_arch_state.npc;

@@ -22,7 +22,10 @@ base_inst* decoder::build_inst(uint32_t pc, uint32_t insn_bits) {
     } else if((insn_bits & MASK_ADDI) == MATCH_ADDI) {
         printf("addi instruction\n");
         return new addi(pc, insn_bits, "addi");
-    }
+    } else if((insn_bits & MASK_BEQ) == MATCH_BEQ) {
+        printf("beq instruction\n");
+        return new beq(pc, insn_bits, "beq");
+    } 
     return NULL;
 }
 
