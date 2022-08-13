@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
-#include "base_inst.h"
+#include "insn/base_inst.h"
 
 struct insn_decode_info {
 public:

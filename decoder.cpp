@@ -1,6 +1,6 @@
 #include "decoder.h"
-#include "riscv_inst.h"
-#include "insn_encoding.h"
+#include "insn/riscv_inst.h"
+#include "insn/insn_encoding.h"
 
 decoder::decoder() {
 }

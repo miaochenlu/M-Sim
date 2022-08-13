@@ -1,9 +1,9 @@
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
 
-#include "reg_file.h"
 #include "rom.h"
 #include "ram.h"
+#include "reg_file.h"
 #include "decoder.h"
 
 class processor {

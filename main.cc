@@ -1,8 +1,3 @@
-#include "decoder.h"
-#include "base_inst.h"
-#include "riscv_inst.h"
-#include "rom.h"
-#include "ram.h"
 #include "processor.h"
 #include <iostream>
 

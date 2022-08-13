@@ -1,6 +1,5 @@
 #include "riscv_inst.h"
-#include "reg_file.h"
-#include "processor.h"
+#include "../processor.h"
 
 using namespace std;
 
