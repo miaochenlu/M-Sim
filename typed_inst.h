@@ -7,6 +7,7 @@
 class rtype_inst: public base_inst {
 public:
     rtype_inst(uint32_t pc, uint32_t insn_bits, const std::string& name);
+    std::string disassembly();
 };
 
 template<typename imm_type>

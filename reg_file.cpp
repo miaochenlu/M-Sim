@@ -4,6 +4,11 @@ gpr_regfile::gpr_regfile() {
     for(int i = 0; i < 32; i++) {
         regs[i] = 0;
     }
+    regs[2] = 8;
+    regs[4] = 20;
+    regs[5] = 0x14;
+    regs[6] = 0xFFFF0000;
+    regs[7] = 0x0FFF0000;
 }
 
 gpr_regfile::~gpr_regfile() {

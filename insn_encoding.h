@@ -3,17 +3,58 @@
 
 #ifndef RISCV_ENCODING
 #define RISCV_ENCODING
-
+/***************R type****************/
 #define MATCH_ADD 0x33
 #define MASK_ADD 0xfe00707f
+
+#define MATCH_SUB 0x40000033
+#define MASK_SUB 0xfe00707f
+
+#define MATCH_SLL 0x1033
+#define MASK_SLL 0xfe00707f
+
+#define MATCH_SLT 0x2033
+#define MASK_SLT 0xfe00707f
+
+#define MATCH_SLTU 0x3033
+#define MASK_SLTU 0xfe00707f
+
+#define MATCH_XOR 0x4033
+#define MASK_XOR 0xfe00707f
+
+#define MATCH_SRL 0x5033
+#define MASK_SRL 0xfe00707f
+
+#define MATCH_SRA 0x40005033
+#define MASK_SRA 0xfe00707f
+
+#define MATCH_OR 0x6033
+#define MASK_OR 0xfe00707f
+
+#define MATCH_AND 0x7033
+#define MASK_AND 0xfe00707f
+
+/***************I type****************/
 #define MATCH_ADDI 0x13
 #define MASK_ADDI 0x707f
+
+/***************B type****************/
 #define MATCH_BEQ 0x63
 #define MASK_BEQ 0x707f
 #endif
 
 #ifdef DECLARE_INSN
 DECLARE_INSN(add, MATCH_ADD, MASK_ADD)
+DECLARE_INSN(sub, MATCH_SUB, MASK_SUB)
+DECLARE_INSN(sll, MATCH_SLL, MASK_SLL)
+DECLARE_INSN(slt, MATCH_SLT, MASK_SLT)
+DECLARE_INSN(sltu, MATCH_SLTU, MASK_SLTU)
+DECLARE_INSN(xor, MATCH_XOR, MASK_XOR)
+DECLARE_INSN(srl, MATCH_SRL, MASK_SRL)
+DECLARE_INSN(sra, MATCH_SRA, MASK_SRA)
+DECLARE_INSN(or, MATCH_OR, MASK_OR)
+DECLARE_INSN(and, MATCH_AND, MASK_AND)
+
 DECLARE_INSN(addi, MATCH_ADDI, MASK_ADDI)
 DECLARE_INSN(beq, MATCH_BEQ, MASK_BEQ)
 #endif
