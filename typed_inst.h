@@ -21,17 +21,23 @@ protected:
     imm_type imm;
 };
 
-
 class mem_inst: public base_inst {
-
+public:
+    mem_inst(uint32_t pc, uint32_t insn_bits, const std::string& name, uint32_t imm = 0);
+protected:
+    uint32_t imm;
 };
 
 class load_inst: public mem_inst {
-
+public:
+    load_inst(uint32_t pc, uint32_t insn_bits, const std::string& name);
+    std::string disassembly();
 };
 
 class store_inst: public mem_inst {
-
+public:
+    store_inst(uint32_t pc, uint32_t insn_bits, const std::string& name);
+    std::string disassembly();
 };
 
 #endif

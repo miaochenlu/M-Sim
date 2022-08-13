@@ -7,5 +7,5 @@ base_inst::base_inst(uint32_t pc, uint32_t insn_bits, const std::string& name)
 }
 
 void base_inst::execute(processor& p) {
-    printf("base inst execute\n");
+    printf("ERROR: base inst execute\n");
 }
