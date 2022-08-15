@@ -13,7 +13,7 @@ public:
 public:
     void init_memory(const std::string& file_name);
 
-    uint32_t read(uint32_t addr, uint32_t byte_num);
+    uint32_t read(uint32_t addr, uint32_t byte_num) const;
 
     void write(uint32_t addr, uint32_t byte_num, uint32_t value);
 

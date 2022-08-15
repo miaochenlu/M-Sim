@@ -32,7 +32,7 @@ void rom::init_memory(const std::string& file_name) {
     }
 }
 
-uint32_t rom::read(uint32_t pc) {
+uint32_t rom::read(uint32_t pc) const {
     if((pc >> 2) >= mem.size()) {
         std::cout << "ERROR: addr out of range" << std::endl;
         return 0;

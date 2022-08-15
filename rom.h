@@ -13,7 +13,7 @@ public:
 public:
     void init_memory(const std::string& file_name);
 
-    uint32_t read(uint32_t pc);
+    uint32_t read(uint32_t pc) const;
 
 private:
     std::string rom_file_name;

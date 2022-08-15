@@ -29,7 +29,7 @@ void ram::init_memory(const std::string& file_name) {
     }
 }
 
-uint32_t ram::read(uint32_t addr, uint32_t byte_num) {
+uint32_t ram::read(uint32_t addr, uint32_t byte_num) const {
     if(addr + byte_num >= mem.size()) {
         std::cout << "ERROR: addr out of range" << std::endl;
         return 0;
