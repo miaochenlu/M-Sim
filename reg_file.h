@@ -2,6 +2,8 @@
 #define REG_FILE_H
 
 #include <stdint.h>
+#include <unordered_map>
+#include "csr.h"
 
 class gpr_regfile {
 public:
@@ -19,9 +21,12 @@ private:
 
 class arch_state {
 public:
+    uint32_t priv;
     uint32_t pc;
     uint32_t npc;
     gpr_regfile gprs;
+
+    std::unordered_map<uint32_t, base_csr> csr_map;
 
 public:
     arch_state();

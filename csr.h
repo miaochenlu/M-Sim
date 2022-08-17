@@ -3,11 +3,9 @@
 
 #include <stdint.h>
 
-enum priv_mode {
-    PRV_U = 0,
-    PRV_S = 1,
-    PRV_M = 3
-};
+// example (0x1100 & 0x1100) / 4
+#define get_field(reg, mask) (((reg) & (decltype(reg))(mask)) / ((mask) & ~((mask) << 1)))
+#define set_field(reg, mask, val) (((reg) & ~(decltype(reg))(mask)) | (((decltype(reg))(val) * ((mask) & ~((mask) << 1))) & (decltype(reg))(mask)))
 
 class base_csr {
 public:
@@ -21,14 +19,23 @@ public:
     virtual void write(const uint32_t val);
 
 protected:
-    uint32_t value;
-    const bool csr_rw; // read only ? read write?
+    const bool csr_readonly; // read only ? read write?
     const unsigned csr_priv;
 };
 
 
-class status_csr: public base_csr {
+class mstatus_csr: public base_csr {
+public:
+    mstatus_csr(const uint32_t reg_addr);
+    virtual ~mstatus_csr();
 
+public:
+    virtual uint32_t read() const;
+    virtual void write(const uint32_t val);
+private:
+    uint32_t mstatus_init();
+private:
+    uint32_t value;
 };
 
 class epc_csr: public base_csr {
@@ -39,6 +46,31 @@ public:
 public:
     virtual uint32_t read() const;
     virtual void write(const uint32_t val);
+private:
+    uint32_t value;
 };
 
+class tvec_csr: public base_csr {
+public:
+    tvec_csr(const uint32_t reg_addr);
+    virtual ~tvec_csr();
+
+public:
+    virtual uint32_t read() const;
+    virtual void write(const uint32_t val);
+private:
+    uint32_t value;
+};
+
+class cause_csr: public base_csr {
+public:
+    cause_csr(const uint32_t reg_addr);
+    virtual ~cause_csr();
+
+public:
+    virtual uint32_t read() const;
+    virtual void write(const uint32_t val);
+private:
+    uint32_t value;
+};
 #endif
