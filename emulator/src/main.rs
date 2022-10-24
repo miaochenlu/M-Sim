@@ -3,6 +3,7 @@ mod cpu;
 mod dram;
 mod param;
 mod exception;
+mod csr;
 
 use std::env;
 use std::fs::File;

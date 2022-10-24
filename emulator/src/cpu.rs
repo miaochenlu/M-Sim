@@ -3,11 +3,13 @@
 use crate::bus::*;
 use crate::param::*;
 use crate::exception::*;
+use crate::csr::*;
 
 pub struct Cpu {
     pub regs: [u64; 32],
     pub pc: u64,
     pub bus: Bus,
+    pub csr: Csr,
 }
 
 const RVABI: [&str; 32] = [
@@ -21,8 +23,10 @@ impl Cpu {
     pub fn new(code: Vec<u8>) -> Self {
         let mut regs = [0; 32];
         regs[2] = DRAM_END;
+        let pc = DRAM_BASE;
         let bus = Bus::new(code);
-        Self { regs, pc: DRAM_BASE, bus}
+        let csr = Csr::new();
+        Self { regs, pc, bus, csr}
     }
 
     pub fn load(&mut self, addr: u64, size: u64) -> Result<u64, Exception> {
@@ -392,6 +396,51 @@ impl Cpu {
                     | ((inst >> 20) & 0x7fe); // imm[10:1]
                 return Ok(self.pc.wrapping_add(imm));
             }
+            0x73 => {
+                let csr_addr = ((inst & 0xfff00000) >> 20) as usize;
+                // csrrc
+                match funct3 {
+                    0x1 => {
+                        let t = self.csr.load(csr_addr);
+                        self.csr.store(csr_addr, self.regs[rs1]);
+                        self.regs[rd] = t;
+                        return self.update_pc();
+                    },
+                    0x2 => {
+                        let t = self.csr.load(csr_addr);
+                        self.csr.store(csr_addr, t | self.regs[rs1]);
+                        self.regs[rd] = t;
+                        return self.update_pc();
+                    },
+                    0x3 => {
+                        let t = self.csr.load(csr_addr);
+                        self.csr.store(csr_addr, t & (!self.regs[rs1]));
+                        self.regs[rd] = t;
+                        return self.update_pc();
+                    },
+                    0x5 => {
+                        let zimm = rs1 as u64;
+                        self.csr.store(csr_addr, zimm);
+                        self.regs[rd] = zimm;
+                        return self.update_pc();
+                    },
+                    0x6 => {
+                        let zimm = rs1 as u64;
+                        let t = self.csr.load(csr_addr);
+                        self.csr.store(csr_addr, t | zimm);
+                        self.regs[rd] = t;
+                        return self.update_pc();
+                    },
+                    0x7 => {
+                        let zimm = rs1 as u64;
+                        let t = self.csr.load(csr_addr);
+                        self.csr.store(csr_addr, t & !zimm);
+                        self.regs[rd] = t;
+                        return self.update_pc();
+                    },
+                    _ => Err(Exception::IllegalInstruction(inst)),
+                }
+            }
             _ => Err(Exception::IllegalInstruction(inst)),
         }
 
@@ -438,6 +487,24 @@ impl Cpu {
                     }
                     panic!("Invalid register {}", r);
                 }
+                "mhartid" => self.csr.load(MHARTID),
+                "mstatus" => self.csr.load(MSTATUS),
+                "mtvec" => self.csr.load(MTVEC),
+                "mepc" => self.csr.load(MEPC),
+                "mcause" => self.csr.load(MCAUSE),
+                "mtval" => self.csr.load(MTVAL),
+                "medeleg" => self.csr.load(MEDELEG),
+                "mscratch" => self.csr.load(MSCRATCH),
+                "MIP" => self.csr.load(MIP),
+                "mcounteren" => self.csr.load(MCOUNTEREN),
+                "sstatus" => self.csr.load(SSTATUS),
+                "stvec" => self.csr.load(STVEC),
+                "sepc" => self.csr.load(SEPC),
+                "scause" => self.csr.load(SCAUSE),
+                "stval" => self.csr.load(STVAL),
+                "sscratch" => self.csr.load(SSCRATCH),
+                "SIP" => self.csr.load(SIP),
+                "SATP" => self.csr.load(SATP),
                 _ => panic!("Invalid register {}", r),
             }
         }
@@ -725,5 +792,24 @@ mod test {
             addw a2, a0, a1
         ";
         riscv_test!(code, "test_word_op", 29, "a2" => 0x7f00002a);
+    }
+
+    #[test]
+    fn test_csrs1() {
+        let code = "
+            addi t0, zero, 1
+            addi t1, zero, 2
+            addi t2, zero, 3
+            csrrw zero, mstatus, t0
+            csrrs zero, mtvec, t1
+            csrrw zero, mepc, t2
+            csrrc t2, mepc, zero
+            csrrwi zero, sstatus, 4
+            csrrsi zero, stvec, 5
+            csrrwi zero, sepc, 6
+            csrrci zero, sepc, 0 
+        ";
+        riscv_test!(code, "test_csrs1", 20, "mstatus" => 1, "mtvec" => 2, "mepc" => 3,
+                                            "sstatus" => 0, "stvec" => 5, "sepc" => 6);
     }
 }
