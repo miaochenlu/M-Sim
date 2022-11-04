@@ -5,9 +5,15 @@ use crate::param::*;
 use crate::exception::*;
 use crate::csr::*;
 
+type Mode = u64;
+const User: Mode = 0b00;
+const Supervisor: Mode = 0b01;
+const Machine: Mode = 0b11;
+
 pub struct Cpu {
     pub regs: [u64; 32],
     pub pc: u64,
+    pub mode: Mode,
     pub bus: Bus,
     pub csr: Csr,
 }
@@ -26,7 +32,8 @@ impl Cpu {
         let pc = DRAM_BASE;
         let bus = Bus::new(code);
         let csr = Csr::new();
-        Self { regs, pc, bus, csr}
+        let mode = Machine;
+        Self { regs, pc, mode, bus, csr}
     }
 
     pub fn load(&mut self, addr: u64, size: u64) -> Result<u64, Exception> {
@@ -221,6 +228,39 @@ impl Cpu {
                     _ => unreachable!(),
                 }
             }
+            0x2f => {
+                let funct5 = (funct7 & 0b1111100) >> 2;
+                let _aq = (funct7 & 0b0000010) >> 1;
+                let _rl = funct7 & 0b0000001;
+
+                match (funct3, funct5) {
+                    (0x2, 0x00) => {
+                        let t = self.load(self.regs[rs1], 32)?;
+                        self.store(self.regs[rs1], 32, t.wrapping_add(self.regs[rs2]))?;
+                        self.regs[rd] = t;
+                        return self.update_pc();
+                    }
+                    (0x3, 0x00) => {
+                        let t = self.load(self.regs[rs1], 64)?;
+                        self.store(self.regs[rs1], 64, t.wrapping_add(self.regs[rs2]))?;
+                        self.regs[rd] = t;
+                        return self.update_pc();
+                    }
+                    (0x2, 0x01) => {
+                        let t = self.load(self.regs[rs1], 32)?;
+                        self.store(self.regs[rs1], 32, self.regs[rs2])?;
+                        self.regs[rd] = t;
+                        return self.update_pc();
+                    }
+                    (0x3, 0x01) => {
+                        let t = self.load(self.regs[rs1], 64)?;
+                        self.store(self.regs[rs1], 64, self.regs[rs2])?;
+                        self.regs[rd] = t;
+                        return self.update_pc();
+                    }
+                    _ => Err(Exception::IllegalInstruction(inst)),
+                }
+            }
             0x33 => {
                 // "SLL, SRL, and SRA perform logical left, logical right, and arithmetic right
                 // shifts on the value in register rs1 by the shift amount held in register rs2.
@@ -316,9 +356,33 @@ impl Cpu {
                         self.regs[rd] = (self.regs[rs1] as u32).wrapping_shr(shamt) as i32 as u64;
                         return self.update_pc();
                     }
+                    (0x5, 0x01) => {
+                        // divu
+                        self.regs[rd] = match self.regs[rs2] {
+                            0 => 0xffffffff_ffffffff,
+                            _ => {
+                                let dividend = self.regs[rs1];
+                                let divisor = self.regs[rs2];
+                                dividend.wrapping_div(divisor)
+                            }
+                        };
+                        return self.update_pc();
+                    }
                     (0x5, 0x20) => {
                         // sraw
                         self.regs[rd] = ((self.regs[rs1] as i32) >> (shamt as i32)) as u64;
+                        return self.update_pc();
+                    }
+                    (0x7, 0x01) => {
+                        // remuw
+                        self.regs[rd] = match self.regs[rs2] {
+                            0 => self.regs[rs1],
+                            _ => {
+                                let dividend = self.regs[rs1] as u32;
+                                let divisor = self.regs[rs2] as u32;
+                                dividend.wrapping_rem(divisor) as i32 as u64
+                            }
+                        };
                         return self.update_pc();
                     }
                     _ => Err(Exception::IllegalInstruction(inst)),
@@ -398,8 +462,50 @@ impl Cpu {
             }
             0x73 => {
                 let csr_addr = ((inst & 0xfff00000) >> 20) as usize;
-                // csrrc
+
                 match funct3 {
+                    0x0 => {
+                        match(rs2, funct7) {
+                            (0x2, 0x08) => {
+                                let mut sstatus = self.csr.load(SSTATUS);
+                                self.mode = (sstatus & MASK_SPP) >> 8;
+                                // The SPIE bit is SSTATUS[5] and the SIE bit is the SSTATUS[1]
+                                let spie = (sstatus & MASK_SPIE) >> 5;
+                                // set SIE = SPIE
+                                sstatus = (sstatus & !MASK_SIE) | (spie << 1);
+                                // set SPIE = 1
+                                sstatus |= MASK_SPIE;
+                                // set SPP the least privilege mode (u-mode)
+                                sstatus &= !MASK_SPP;
+                                self.csr.store(SSTATUS, sstatus);
+                                let new_pc = self.csr.load(SEPC) & !0b11;
+                                return Ok(new_pc);
+                            }
+                            (0x2, 0x18) => {
+                                let mut mstatus = self.csr.load(MSTATUS);
+                                self.mode = (mstatus & MASK_MPP) >> 11;
+                                // The MPIE bit is MSTATUS[7] and the MIE bit is the MSTATUS[3].
+                                let mpie = (mstatus & MASK_MPIE) >> 7;
+                                // set MIE = MPIE
+                                mstatus = (mstatus & (!MASK_MIE)) | (mpie << 3);
+                                // set MPIE = 1
+                                mstatus |= MASK_MPIE;
+                                // set MPP the least privilege mode (u-mode)
+                                mstatus &= !MASK_MPP;
+                                // If MPP != M, sets MPRV=0
+                                mstatus &= !MASK_MPRV;
+                                self.csr.store(MSTATUS, mstatus);
+                                let new_pc = self.csr.load(MEPC) & !0b11;
+                                return Ok(new_pc);
+                            }
+                            (_, 0x9) => {
+                                // sfence.vma
+                                // Do nothing
+                                return self.update_pc();
+                            }
+                            _ => Err(Exception::IllegalInstruction(inst)),
+                        }
+                    }
                     0x1 => {
                         let t = self.csr.load(csr_addr);
                         self.csr.store(csr_addr, self.regs[rs1]);
