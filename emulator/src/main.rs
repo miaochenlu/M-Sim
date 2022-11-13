@@ -4,6 +4,8 @@ mod dram;
 mod param;
 mod exception;
 mod csr;
+mod clint;
+mod plic;
 
 use std::env;
 use std::fs::File;
@@ -29,8 +31,12 @@ fn main() -> io::Result<()>{
         let inst = match cpu.fetch() {
             Ok(inst) => inst,
             Err(e) => {
-                println!("{}", e);
-                break;
+                cpu.handle_exception(e);
+                if e.is_fatal() {
+                    println!("{}", e);
+                    break;
+                }
+                continue;
             }
         };
 
@@ -43,6 +49,7 @@ fn main() -> io::Result<()>{
         }
     }
     cpu.dump_registers();
+    cpu.dump_csrs();
     cpu.dump_pc();
 
     Ok(())

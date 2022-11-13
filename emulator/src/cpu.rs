@@ -580,6 +580,10 @@ impl Cpu {
         println!("{}", output);
     }
 
+    pub fn dump_csrs(&self) {
+        self.csr.dump_csrs();
+    }
+
     pub fn reg(&self, r: &str) -> u64 {
         match RVABI.iter().position(|&x| x == r) {
             Some(i) => self.regs[i],
@@ -614,6 +618,37 @@ impl Cpu {
                 _ => panic!("Invalid register {}", r),
             }
         }
+    }
+
+    pub fn handle_exception(&mut self, e: Exception) {
+        let pc = self.pc;
+        let mode = self.mode;
+        let cause = e.code();
+
+        // if an exception happen in U-mode or S-mode, and the exception is delegated to S-mode.
+        // then this exception should be handled in S-mode.
+        let trap_in_s_mode = mode <= Supervisor && self.csr.is_medelegated(cause);
+
+        let (STATUS, TVEC, CAUSE, TVAL, EPC, MASK_PIE, pie_i, MASK_IE, ie_i, MASK_PP, pp_i)
+            = if trap_in_s_mode {
+                self.mode = Supervisor;
+                (SSTATUS, STVEC, SCAUSE, STVAL, SEPC, MASK_SPIE, 5, MASK_SIE, 1, MASK_SPP, 8)
+            } else {
+                self.mode = Machine;
+                (MSTATUS, MTVEC, MCAUSE, MTVAL, MEPC, MASK_MPIE, 7, MASK_MIE, 2, MASK_MPP, 11)
+            };
+        
+        self.pc = self.csr.load(TVEC) & !0b11;
+        self.csr.store(EPC, pc);
+        self.csr.store(CAUSE, cause);
+        self.csr.store(TVAL, e.value());
+
+        let mut status = self.csr.load(STATUS);
+        let ie = (status & MASK_IE) >> ie_i;
+        status = (status & !MASK_PIE) | (ie << pie_i);
+        status &= !MASK_IE;
+        status = (status & !MASK_PP) | (mode << pp_i);
+        self.csr.store(STATUS, status);
     }
     
 }
